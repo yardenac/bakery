@@ -14,6 +14,7 @@
 // *  Name       Date       BugzID  Action                                     *
 // *  ---------  ---------  -----   ------                                     *
 // *  SteveTine  28Dec2005  12561   Initial Creation                           *
+// *  SteveTine  30Sep2006  15281   Dealing with difference in moveTo on Linux *
 // *                                                                           *
 // ************************* BEGIN LICENSE BLOCK *******************************
 // * Version: MPL 1.1                                                          *
@@ -281,10 +282,10 @@ CookieProfileContainer.prototype.setActiveProfileId = function(profileId)
    {
       var i = this.activeProfileId;
       var fileHandle = this.profileArray[i].profile.getFileHandle();
-     
+
       //Renaming to inactive filename
       this.classDump("Renaming " + this.profileArray[i].name + " (old profile)");
-      fileHandle.moveTo(null,COOKIE_FILE_PREFACE + this.profileArray[i].name + "." + INACT_COOKIE_FILE_EXT);
+      this.profileArray[i].profile.setFileHandle(this.moveFile(fileHandle, COOKIE_FILE_PREFACE + this.profileArray[i].name + "." + INACT_COOKIE_FILE_EXT));
    }
 
    //If the new profileID is valid, rename that profile's file to indicate that it
@@ -294,8 +295,9 @@ CookieProfileContainer.prototype.setActiveProfileId = function(profileId)
       var i = profileId;  //Rename profileId to a shorter var
       var fileHandle = this.profileArray[i].profile.getFileHandle();
          
+      //Renaming to active filename
       this.classDump("Renaming " + this.profileArray[i].name + " (new profile)");
-      fileHandle.moveTo(null,COOKIE_FILE_PREFACE + this.profileArray[i].name + "." + ACTV_COOKIE_FILE_EXT);
+      this.profileArray[i].profile.setFileHandle(this.moveFile(fileHandle, COOKIE_FILE_PREFACE + this.profileArray[i].name + "." + ACTV_COOKIE_FILE_EXT));
    }
    else
    {
@@ -309,4 +311,27 @@ CookieProfileContainer.prototype.setActiveProfileId = function(profileId)
    return(this.activeProfileId);
 }
 
+CookieProfileContainer.prototype.moveFile = function(fileHandle, newFileName)
+{
+   this.classDump("---move start (from '" + fileHandle.leafName + "' to '" +  newFileName + "')---");
 
+   //Actually rename the file to the new name
+   fileHandle.moveTo(null, newFileName);
+
+   //On certain OSs (i.e. Linux), the call to moveTo does not update the fileHandle to point
+   //  to the new file.  In that case, update it manually
+   if (fileHandle.leafName != newFileName)
+   {
+      //Replace the existing filename portion of the path with the new filename portion of the path
+      newFilePath = fileHandle.path.replace(fileHandle.leafName, newFileName);
+
+      this.classDump("Needing to update fileHandle on this OS from '" + fileHandle.path + "' to '" + newFilePath);
+
+      //Create a new nsIFile object and point it to the new file
+      fileHandle = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+      fileHandle.initWithPath(newFilePath);
+   }
+
+   this.classDump("---move end---");
+   return(fileHandle);
+}

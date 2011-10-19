@@ -15,6 +15,7 @@
 // *  ---------  ---------  -----   ------                                     *
 // *  SteveTine  28Dec2005  12561   Initial Creation                           *
 // *  SteveTine  11Jan2006  12720   Fixing the way session cookies are handled *
+// *  SteveTine  30Sep2006  15281   Adding setFileHandle method                *
 // *                                                                           *
 // ************************* BEGIN LICENSE BLOCK *******************************
 // * Version: MPL 1.1                                                          *
@@ -95,6 +96,12 @@ function CookieProfile(fileName)
 CookieProfile.prototype.getFileHandle = function()
 {
    return(this.fileName);
+}
+
+//Sets a NsIFile
+CookieProfile.prototype.setFileHandle = function(newFile)
+{
+   this.fileName = newFile;
 }
 
 //NOTE this method will copy all the cookies in the Profile to the browser.  It

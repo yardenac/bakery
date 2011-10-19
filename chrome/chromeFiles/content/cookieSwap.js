@@ -18,6 +18,7 @@
 // *  ---------  ---------  -----   ------                                     *
 // *  SteveTine  28Dec2005  12561   Initial Creation                           *
 // *  SteveTine  15Jan2005  12751   Stop-gap solution to multiple window prob  *
+// *  SteveTine  18Jan2005  12855   Prompt the user before removing all cookies*
 // *                                                                           *
 // ************************* BEGIN LICENSE BLOCK *******************************
 // * Version: MPL 1.1                                                          *
@@ -44,7 +45,7 @@
 // **************************END LICENSE BLOCK**********************************
 
 //This constant defines if debug to stdout is enable or not.
-const COOKIE_SWAP_DEBUG_ENABLED=false;
+const COOKIE_SWAP_DEBUG_ENABLED=true;
 var   gExtensionActive=true;
 
 //Called only once at browser startup
@@ -179,6 +180,17 @@ function cookieswap_runGeneric()
    cookieswap_dbg("START runGeneric()");
 
    cookieswap_dbg("END runGeneric()");
+}
+
+function cookieswap_UiRemoveAllCookies()
+{
+   var do_remove = window.confirm("Are you sure you want to remove all the cookies in this profile?");
+
+   //If user was sure, remove the cookies
+   if (do_remove == true)
+   {
+      cookieswap_removeAllCookies();
+   }
 }
 
 function cookieswap_removeAllCookies()
