@@ -98,7 +98,7 @@ CookieProfile.prototype.getFileHandle = function()
    return(this.fileName);
 }
 
-//Sets a NsIFile
+//Sets the NsIFile
 CookieProfile.prototype.setFileHandle = function(newFile)
 {
    this.fileName = newFile;

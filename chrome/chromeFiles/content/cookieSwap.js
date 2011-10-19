@@ -45,7 +45,7 @@
 // **************************END LICENSE BLOCK**********************************
 
 //This constant defines if debug to stdout is enable or not.
-const COOKIE_SWAP_DEBUG_ENABLED=true;
+const COOKIE_SWAP_DEBUG_ENABLED=false;
 var   gExtensionActive=true;
 
 //Called only once at browser startup
@@ -237,6 +237,8 @@ function cookieswap_manageProfiles()
    alert("Sorry...this feature will be in a future release.\n" +
          "Until then, you can add, delete and rename profiles by closing the broswer and \n" +
          "changing the filenames in this dir:\n" +
-          profile_ctnr.profileDir.path + "\n\n" +
+          profile_ctnr.profileDir.path + "\n" +
+          "On Windows, some of these directories may be hidden.  Use Tools->FolderOptions->View->ShowHiddenFilesAndFolders\n" +
+          "in the Windows file explorer window to see these hidden directories.\n\n" +
           "See http://cookieswap.mozdev.org/help.html for detailed instructions.\n");
 }

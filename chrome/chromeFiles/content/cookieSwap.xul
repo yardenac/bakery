@@ -35,8 +35,10 @@
        <menuitem label="Remove all cookies" oncommand="cookieswap_UiRemoveAllCookies()" />
        <menuitem label="Manage profiles"    oncommand="cookieswap_manageProfiles()" />
 
+<!--OLD TEMP MENU ITEMS
 		 <menuitem label="generic" oncommand="cookieswap_runGeneric()" />
 		 <menuitem label="debugOn" oncommand="cookieswap_turnOnDebug()" />
+ -->
 	 </popup>
  </popupset>
 
