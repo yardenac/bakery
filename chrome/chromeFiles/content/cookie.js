@@ -1,5 +1,5 @@
 // *****************************************************************************
-// *                           Cookie Class                                    *
+// *                           CookieHolder Class                              *
 // *                                                                           *
 // ************************** Coding Standards *********************************
 // *  gMyVariable     - global variable (starts with "g", then mixed case)     *
@@ -15,6 +15,7 @@
 // *  ---------  ---------  -----   ------                                     *
 // *  SteveTine  28Dec2005  12561   Initial Creation                           *
 // *  SteveTine  11Jan2006  12720   Fixing the way session cookies are handled *
+// *  SteveTine  16Jan2007  Trac9   Changing class name to avoid name clash    *
 // *                                                                           *
 // ************************* BEGIN LICENSE BLOCK *******************************
 // * Version: MPL 1.1                                                          *
@@ -45,8 +46,8 @@
 const SEC_TO_MS_MULT = 1000;
 const TAB_FIELD = "\t";
 
-//-------------------Cookie class def---------------------
-//  This file contains the definition of the "Cookie" class which
+//-------------------CookieHolder class def---------------------
+//  This file contains the definition of the "CookieHolder" class which
 //  provides the ability to input a nsICookie or String consisting of a cookie
 //  line in a storage file.  It can then output the cookie in numerous
 //  styles:
@@ -57,13 +58,13 @@ const TAB_FIELD = "\t";
 //"cookie" can be a NsICookie or it can be a string that corresponds
 //  to the cookie file string returned from a previous instance of
 //  this cookie's getCookieFileString() call.
-function Cookie(cookie)   
+function CookieHolder(cookie)   
 {
    //Define a debug function for the class...change true/false to turn it on/off
-   this.classDump=function(s){true ? cookieswap_dbg("[Cookie]" + s) : (s)}
+   this.classDump=function(s){true ? cookieswap_dbg("[CookieHolder]" + s) : (s)}
 
    //This is the way to call the debug function
-   this.classDump("START Cookie ctor");
+   this.classDump("START CookieHolder ctor");
 
    this.isValid = false;  //Init cookieValid flag to false...the code below will
                                 //  change to true if it is found to be valid
@@ -116,12 +117,12 @@ function Cookie(cookie)
       }
    }
 
-   this.classDump("END Cookie ctor...cookie is " + this.isValid);
+   this.classDump("END CookieHolder ctor...cookie is " + this.isValid);
 }
 
 //Public Methods
-//--------------Cookie class methods-------------------
-Cookie.prototype.getCookieFileString = function()
+//--------------CookieHolder class methods-------------------
+CookieHolder.prototype.getCookieFileString = function()
 {
    this.classDump("START getCookieFileString()");
 
@@ -147,7 +148,7 @@ Cookie.prototype.getCookieFileString = function()
 
 //This method returns a string that captures all the attributes of the cookie.  It is a 
 //  string that can be used in the setCookieString method of the Cookie Service
-Cookie.prototype.getCookieString = function()
+CookieHolder.prototype.getCookieString = function()
 {
    this.classDump("START getCookieString()");
 
@@ -182,7 +183,7 @@ Cookie.prototype.getCookieString = function()
 }
 
 //This method returns a nsIURI object that is the URL of the cookie
-Cookie.prototype.getCookieUrl = function()
+CookieHolder.prototype.getCookieUrl = function()
 {
    this.classDump("START getCookieUrl()");
    var uri = ffGetStandardUrl();
@@ -198,7 +199,7 @@ Cookie.prototype.getCookieUrl = function()
 
 //This method will return if the cookie is a "session" cookie (on that expires
 //  at the end of the session) or not
-Cookie.prototype.isSessionCookie = function()
+CookieHolder.prototype.isSessionCookie = function()
 {
    //A session cookie is one with an expiration time of 0
    return(this.expires == 0 ? true : false);

@@ -16,6 +16,7 @@
 // *  SteveTine  28Dec2005  12561   Initial Creation                           *
 // *  SteveTine  11Jan2006  12720   Fixing the way session cookies are handled *
 // *  SteveTine  30Sep2006  15281   Adding setFileHandle method                *
+// *  SteveTine  16Jan2006  Trac9   Create CookieHolder instead of Cookie class*
 // *                                                                           *
 // ************************* BEGIN LICENSE BLOCK *******************************
 // * Version: MPL 1.1                                                          *
@@ -147,7 +148,7 @@ CookieProfile.prototype.copyToBrowser = function()
          //Make sure there is data on the line and it is not a comment
          if ((str_line.length > 0) && (str_line.charAt(0) != '#'))
          {
-            var  curr_cookie = new Cookie(str_line);
+            var  curr_cookie = new CookieHolder(str_line);
         
             if (curr_cookie.isValid == true)
             {
@@ -222,8 +223,8 @@ CookieProfile.prototype.copyFromBrowser = function()
    
           //this.classDump("Constructing new cookie");
 
-          //Conver the cookie to a "Cookie" class so we can get the FileString
-          tmp_cookie = new Cookie(curr_cookie);
+          //Conver the cookie to a "CookieHolder" class so we can get the FileString
+          tmp_cookie = new CookieHolder(curr_cookie);
           //this.classDump("I have the new cookie");
 
           //Append the cookie to the global cookie store
