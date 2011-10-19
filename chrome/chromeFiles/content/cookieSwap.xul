@@ -40,7 +40,12 @@
        <menuitem label="Remove all cookies" oncommand="cookieswap_UiRemoveAllCookies()" />
        <menuitem label="Remove all cookies (all profiles)" oncommand="cookieswap_UiRemoveAllCookiesInAllProfiles()" />
        <menuitem label="Manage profiles"    oncommand="cookieswap_manageProfiles()" />
-
+       <!--  This was an idea that has been requested numerous times...a time to auto swap profiles.
+             It's not completely working, so commented out at this time.  The only problem
+	     with it at this point is that you must start and stop the time from the same window
+	     (it doesn't work across windows)...use at your own risk.
+       <menuitem label="Set auto-switch timer"    oncommand="cookieswap_promptForPeriodicTimer()" />
+ -->
 <!--OLD or TEST MENU ITEMS
 		 <menuitem label="generic" oncommand="cookieswap_runGeneric()" />
 		 <menuitem label="debugOn" oncommand="cookieswap_turnOnDebug()" />
@@ -48,7 +53,9 @@
 	 </popup>
 	 <tooltip id="cookieswap-tooltip" insertafter="backMenu">
 		 <vbox flex="1">
-			 <label id="cookieswap-tooltip" value="CookieSwap"/>
+			 <label id="cookieswap-tooltip0" value="CookieSwap:"/>
+			 <label id="cookieswap-tooltip1" value="Right-click to select a new profile"/>
+			 <label id="cookieswap-tooltip2" value="Double-click to switch to the next profile"/>
 		 </vbox>
 	 </tooltip>
  </popupset>

@@ -3,6 +3,11 @@
 const nsIProfile = Components.interfaces.nsIProfile;
 const nsISupports = Components.interfaces.nsISupports;
 
+//Meaning of the network.cookie.cookieBehavior setting
+const COOKIE_BEHAVIOR_ACCEPT_ALL = 0;
+const COOKIE_BEHAVIOR_DISALLOW_THIRD_PARTY = 1;
+const COOKIE_BEHAVIOR_DISABLE_COOKIES = 2;
+
 //class constants (obtained ID from http://extensions.roachfiend.com/cgi-bin/guid.pl)
 const CLASS_ID = Components.ID("{5bec83aa-b019-4ff2-8e26-ec6de45aca4b}");
 const CLASS_NAME = "CookieSwap Profile Manager";
@@ -179,9 +184,23 @@ CookieSwapProfileMgr.prototype = {
    {
       //Now swap in the cookies from the profile to the browser
       var new_profile = this._profileContainer.getProfile(new_profile_id);
+      var prev_third_party_setting;
+
+      //An unanticipated side effect of disabling ThirdPartyCookies is that
+      //  CookieSwap is considered a third-party and so FF does not accept
+      //  the cookies we pass to it.  To get around this, we will change the
+      //  the user's setting for the short time we are writing to the cookie store.
+      //Keep the previous value around so we can switch it back.
+      cookieswap_dbg("Enabling third party cookies");
+      prev_third_party_setting = this.changeThirdPartyCookieSetting(COOKIE_BEHAVIOR_ACCEPT_ALL);
 
       cookieswap_dbg("Starting copyToBrowser");
       new_profile.copyToBrowser();
+     
+      //Switching the setting back the user's original value 
+      cookieswap_dbg("Changing third party cookie setting back to " + prev_third_party_setting);
+      this.changeThirdPartyCookieSetting(prev_third_party_setting);
+
       cookieswap_dbg("Setting activeProfileID to " + new_profile_id);
       this._profileContainer.setActiveProfileId(new_profile_id);
       this.notifyObserversOfSwap(new_profile_id);
@@ -195,6 +214,42 @@ CookieSwapProfileMgr.prototype = {
    
    cookieswap_dbg("END switchProfile");
   },
+
+  //----changeThirdPartyCookieSetting-----
+  //In FF, if the user has selected to not allow ThirdPartyCookies
+  //  (via Tools->Options->Privacy->Cookies in FF 3.0) then FF will
+  //  not accept the cookies passed to the cookie store from CookieSwap
+  //This method allows us to modify that setting temporarly while we
+  //  write the cookies to the store (since we aren't the intended
+  //  target of this setting).
+  //This method changes the ThirdPartyCookieSetting to the value passed
+  //  in and passes back the previous value of the setting.
+  changeThirdPartyCookieSetting: function(newVal) {
+   var cookieBehaviorVal;
+
+   cookieswap_dbg("START changeThirdPartyCookieSetting()");
+
+   var net_pref = Components.classes['@mozilla.org/preferences-service;1']
+                 .getService(Components.interfaces.nsIPrefService);
+   cookieswap_dbg("got net_pref");
+
+   //Get the branch containing the setting
+   net_pref = net_pref.getBranch('network.cookie.');
+   cookieswap_dbg("got network.cookie. branch");
+
+   //Get the current value to pass back to the caller
+   cookieBehaviorVal= net_pref.getIntPref('cookieBehavior'); 
+   cookieswap_dbg("Currently cookieBehavior int is " + cookieBehaviorVal);
+
+   //Setting the behavior to the value passed int.
+   net_pref.setIntPref('cookieBehavior', newVal); 
+   cookieswap_dbg("set to " + newVal);
+
+   cookieswap_dbg("END changeThirdPartyCookieSetting()");
+
+   return(cookieBehaviorVal);
+  },
+
 
   //-------------------------------
   //method of nsISupports interface
@@ -464,7 +519,7 @@ CookieProfileContainer.prototype.getProfileName = function(profileNum)
    }
 }
 
-//This method returns a string that is the name of the profileID passed in.
+//This method returns the number of the profile whose name was passed in.
 //  null is returned if the profileID is invalid.
 CookieProfileContainer.prototype.getProfileNum = function(profileId)
 {
