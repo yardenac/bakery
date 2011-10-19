@@ -418,7 +418,7 @@ function cookieswap_statusBarClick()
 {
    if (gCsMenuDelayTimerId == 0)
    {
-       gCsMenuDelayTimerId = setTimeout( "cookieswap_displayCookieSwapMenu()", gMenuPopupDelay);
+       gCsMenuDelayTimerId = setTimeout(function() {cookieswap_displayCookieSwapMenu();}, gMenuPopupDelay);
    }
       
 }
@@ -509,7 +509,7 @@ function cookieswap_setPeriodicTimer(timeInMs)
                cookieswap_dbg("Cleared previous timer");
             }
    
-            gCsPeriodicTimerId = setInterval( "cookieswap_periodicTimerExpire()", timeInMs);
+            gCsPeriodicTimerId = setInterval(function() {cookieswap_periodicTimerExpire()}, timeInMs);
             cookieswap_dbg("SetInterval to " + timeInMs + " with TimerId " + gCsPeriodicTimerId);
          }
          else
@@ -631,6 +631,12 @@ function cookieswap_loadAboutWin()
    }
 
    return
+}
+
+function cookieswap_loadHelpTab()
+{
+  //Load the Help page on a new tab
+  gBrowser.addTab('http://cookieswap.mozdev.org/help.html');
 }
 
 function cookieswap_getVersion()

@@ -46,7 +46,7 @@
          <menuitem id="cookieswap-menu-options" label="Options"    
                    oncommand="cookieswap_loadOptionsWin()" />
          <menuitem id="cookieswap-menu-help" label="Help"    
-                   oncommand="gBrowser.selectedTab = gBrowser.addTab('http://cookieswap.mozdev.org/help.html')" />
+                   oncommand="cookieswap_loadHelpTab()" />
          <menuitem id="cookieswap-menu-about" label="About"    
                    oncommand="cookieswap_loadAboutWin()" />
          <!--  This was an idea that has been requested numerous times...a time to auto swap profiles.

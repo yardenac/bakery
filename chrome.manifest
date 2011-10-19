@@ -2,3 +2,9 @@ content     cookie_swap              chrome/chromeFiles/content/
 skin        cookieswap  classic/1.0  chrome/chromeFiles/skin/classic/cookieswap/
 overlay chrome://browser/content/browser.xul chrome://cookie_swap/content/cookieSwap.xul
 
+#CookieSwap XPCOM component
+component {5bec83aa-b019-4ff2-8e26-ec6de45aca4b} components/CookieSwapProfileMgr.js
+contract @cookieswap.mozdev.org/profile/manager-service;1 {5bec83aa-b019-4ff2-8e26-ec6de45aca4b}
+category profile-after-change CookieSwapProfileMgr @cookieswap.mozdev.org/profile/manager-service;1 
+
+
