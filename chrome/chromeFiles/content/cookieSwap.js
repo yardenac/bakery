@@ -45,7 +45,7 @@
 // **************************END LICENSE BLOCK**********************************
 
 //This constant defines if debug to stdout is enable or not.
-const COOKIE_SWAP_DEBUG_ENABLED=true;
+const COOKIE_SWAP_DEBUG_ENABLED=false;
 var   gExtensionActive=true;
 
 //Since the CookieSwapProfileManager is a Singleton Service, store it as a global
@@ -99,14 +99,6 @@ function cookieswap_init(event)
    cookieswap_dbg("END cookieswap_init");
 }
 
-//This function is registered with the ProfileUI class to be called
-//  when the user tries to change profiles in an inactive browser.
-function cookieswap_explainInactiveBrowser(profileId)
-{
-   alert("Sorry, in this release, you can only swap cookies from the first " +
-         "browser window opened.");
-}
-
 //This function is registered with the ProfileUI class and is called
 //  whenever the user selects a new cookie profile (or the same profile)
 //In the case where the same profile is selected, the cookies are copied
@@ -133,12 +125,23 @@ function cookieswap_runGeneric()
 
    cookieswap_dbg("START runGeneric()");
 
+   //This was something that I was playing with to flush the Firefox DNS cache.
+   //To flush the cache, set the network.dnsCacheExipration config value to 0 
+   //  (invalidating all entries) then set it back to the original value 
+   //  (so new entries get cached again). 
+   //
+   //Obviously this is something that doesn't belong in CookieSwap, but I had a need for
+   //  it and didn't feel like writing a new extension just to do this so it is
+   //  stuck in here oddly.
    var net_pref = Components.classes['@mozilla.org/preferences-service;1']
                  .getService(Components.interfaces.nsIPrefService);
 
    net_pref = net_pref.getBranch('network.');
    dnsCacheVal = net_pref.getIntPref('dnsCacheExpiration'); 
+   //Setting the exipration to 0 will invalidate all cached entries
    net_pref.setIntPref('dnsCacheExpiration', 0); 
+   //Now set the expiration back to the original value to cause entries to
+   //  be cached again.
    net_pref.setIntPref('dnsCacheExpiration', dnsCacheVal); 
    cookieswap_dbg("Set network.dnsCacheExpiration to 0 then back to " + dnsCacheVal);
 
@@ -156,12 +159,41 @@ function cookieswap_UiRemoveAllCookies()
    }
 }
 
+function cookieswap_UiRemoveAllCookiesInAllProfiles()
+{
+   var do_remove = window.confirm("Are you sure you want to remove all the cookies in all profiles?");
+
+   //If user was sure, remove the cookies
+   if (do_remove == true)
+   {
+      var obj = Object();
+      var profile_array;
+
+      //First remove the cookies in browser memory
+      cookieswap_removeAllCookies();
+
+      //Get the list of all profiles
+      profile_array = gCsProfileMgr.getProfileList(obj);
+   
+      //Remove the cookies in each profile
+      for(var i=0; i<obj.value; i++)
+      {
+         cookieswap_dbg("Clearing cookies in " + profile_array[i]);
+         //The false specifies to delete the contents not the file/profile
+         gCsProfileMgr.deleteProfile(profile_array[i], false);
+      }
+
+      cookieswap_dbg("All cookies removed");
+   }
+}
+   
 function cookieswap_removeAllCookies()
 {
    var cookie_mgr = ffGetCookieManager();
    cookie_mgr.removeAll();
    cookieswap_dbg("All cookies removed");
 }
+
 
 function cookieswap_turnOnDebug()
 {
@@ -183,57 +215,65 @@ function cookieswap_turnOnDebug()
 
 function cookieswap_statusBarDblClick()
 {
-cookieswap_dbg("calling notify");
-Components.classes["@mozilla.org/observer-service;1"]
-         .getService(Components.interfaces.nsIObserverService)
-         .notifyObservers(null, "cookieswap_swap", "someAdditionalInformationPassedAs'Data'Parameter");
-cookieswap_dbg("called notify");
+//------------------UNIT TEST CODE--------------------------
+// This is used for anything right now other than to
+// exercise all the methods on the XPCOM component.
+// This code is only enabled in DEBUG mode.
+//----------------------------------------------------------
+if(COOKIE_SWAP_DEBUG_ENABLED == true)
+{
+  cookieswap_dbg("calling notify");
+  Components.classes["@mozilla.org/observer-service;1"]
+           .getService(Components.interfaces.nsIObserverService)
+           .notifyObservers(null, "cookieswap_swap", "someAdditionalInformationPassedAs'Data'Parameter");
+  cookieswap_dbg("called notify");
 
-// instantiate component object
-var oProfileMgr = Components.classes["@cookieswap.mozdev.org/profile/manager-service;1"].
-                             getService(Components.interfaces.nsIProfile);
-                             //createInstance(Components.interfaces.nsIProfile);
-cookieswap_dbg("Created ProfileMgr");
+  // instantiate component object
+  var oProfileMgr = Components.classes["@cookieswap.mozdev.org/profile/manager-service;1"].
+                               getService(Components.interfaces.nsIProfile);
+                               //createInstance(Components.interfaces.nsIProfile);
+  cookieswap_dbg("Created ProfileMgr");
 
-//--cloneProfile
-oProfileMgr.cloneProfile("test");
-cookieswap_dbg("Cloned Profile");
+  //--cloneProfile
+  oProfileMgr.cloneProfile("test");
+  cookieswap_dbg("Cloned Profile");
 
-//--profileCount
-cookieswap_dbg("Profile Count = " + oProfileMgr.profileCount);
+  //--profileCount
+  cookieswap_dbg("Profile Count = " + oProfileMgr.profileCount);
 
-//--createNewProfile
-oProfileMgr.createNewProfile("test1", "test1dir", "", true);
+  //--createNewProfile
+  oProfileMgr.createNewProfile("test1", "test1dir", "", true);
 
-//--deleteProfile
-oProfileMgr.deleteProfile("test1", true);
-oProfileMgr.deleteProfile("test1", false);
+  //--deleteProfile
+  oProfileMgr.deleteProfile("test1", true);
+  oProfileMgr.deleteProfile("test1", false);
 
-//--getProfileList
-var obj = Object();
-var profile_array;
+  //--getProfileList
+  var obj = Object();
+  var profile_array;
+  
+  profile_array = oProfileMgr.getProfileList(obj);
+  cookieswap_dbg("obj.value = " + obj.value);
+  cookieswap_dbg("profile_array[0] = " + profile_array[0]);
+  cookieswap_dbg("profile_array[1]= " + profile_array[1]);
 
-profile_array = oProfileMgr.getProfileList(obj);
-cookieswap_dbg("obj.value = " + obj.value);
-cookieswap_dbg("profile_array[0] = " + profile_array[0]);
-cookieswap_dbg("profile_array[1]= " + profile_array[1]);
+  //--profileExists
+  cookieswap_dbg("test exists = " + oProfileMgr.profileExists("test"));
+  cookieswap_dbg("test1 exists = " + oProfileMgr.profileExists("test1"));
 
-//--profileExists
-cookieswap_dbg("test exists = " + oProfileMgr.profileExists("test"));
-cookieswap_dbg("test1 exists = " + oProfileMgr.profileExists("test1"));
+  //renameProfile
+  oProfileMgr.renameProfile("test", "test2");
 
-//renameProfile
-oProfileMgr.renameProfile("test", "test2");
+  //shutDownCurrentProfile
+  oProfileMgr.shutDownCurrentProfile(Components.interfaces.nsIProfile.SHUTDOWN_PERSIST);
+  oProfileMgr.shutDownCurrentProfile(Components.interfaces.nsIProfile.SHUTDOWN_CLEANSE);
 
-//shutDownCurrentProfile
-oProfileMgr.shutDownCurrentProfile(Components.interfaces.nsIProfile.SHUTDOWN_PERSIST);
-oProfileMgr.shutDownCurrentProfile(Components.interfaces.nsIProfile.SHUTDOWN_CLEANSE);
-
-cookieswap_dbg("currentProfile = " + oProfileMgr.currentProfile);
-oProfileMgr.currentProfile = "test1";
-cookieswap_dbg("currentProfile = " + oProfileMgr.currentProfile);
-oProfileMgr.currentProfile = "test2";
-cookieswap_dbg("currentProfile = " + oProfileMgr.currentProfile);
+  cookieswap_dbg("currentProfile = " + oProfileMgr.currentProfile);
+  oProfileMgr.currentProfile = "test1";
+  cookieswap_dbg("currentProfile = " + oProfileMgr.currentProfile);
+  oProfileMgr.currentProfile = "test2";
+  cookieswap_dbg("currentProfile = " + oProfileMgr.currentProfile);
+}
 }
 
 function cookieswap_dbg(str)

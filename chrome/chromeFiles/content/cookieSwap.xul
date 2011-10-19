@@ -38,11 +38,12 @@
        <menuseparator id="cookie-profile-list-separator" />
 
        <menuitem label="Remove all cookies" oncommand="cookieswap_UiRemoveAllCookies()" />
+       <menuitem label="Remove all cookies (all profiles)" oncommand="cookieswap_UiRemoveAllCookiesInAllProfiles()" />
        <menuitem label="Manage profiles"    oncommand="cookieswap_manageProfiles()" />
 
+<!--OLD or TEST MENU ITEMS
 		 <menuitem label="generic" oncommand="cookieswap_runGeneric()" />
 		 <menuitem label="debugOn" oncommand="cookieswap_turnOnDebug()" />
-<!--OLD TEMP MENU ITEMS
  -->
 	 </popup>
 	 <tooltip id="cookieswap-tooltip" insertafter="backMenu">

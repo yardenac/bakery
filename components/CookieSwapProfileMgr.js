@@ -8,7 +8,7 @@ const CLASS_ID = Components.ID("{5bec83aa-b019-4ff2-8e26-ec6de45aca4b}");
 const CLASS_NAME = "CookieSwap Profile Manager";
 const CONTRACT_ID = "@cookieswap.mozdev.org/profile/manager-service;1";
 
-const COOKIE_SWAP_COMP_DEBUG_ENABLED = true;
+const COOKIE_SWAP_COMP_DEBUG_ENABLED = false;
 function cookieswap_dbg(str)
 {
    if(COOKIE_SWAP_COMP_DEBUG_ENABLED == true)
@@ -64,13 +64,29 @@ CookieSwapProfileMgr.prototype = {
   },
 
   //---deleteProfile-----
-  //---Delete profName profile.  Remove the file if canDeleteFile is true
+  //---CookieSwap changes the definition of this method slightly.  If
+  //---  canDeleteFile is true then the profile is completely deleted and
+  //---  removed as a profile.  If canDeleteFile is false, then the contents
+  //---  (i.e. cookies) of the profile are deleted, but the profile still
+  //---  exists.
   deleteProfile: function(profName, canDeleteFile) {
     cookieswap_dbg("Deleting" + profName + "\n");
     if (canDeleteFile == true)
-       cookieswap_dbg("Deleting file\n");
+       cookieswap_dbg("Not implemented...Deleting profile and file\n");
     else
-       cookieswap_dbg("NOT deleting file\n");
+    {
+       cookieswap_dbg("Deleting cookies associated with " + profName + "\n");
+       var req_profile = this._profileContainer.getProfile(profName);
+       if (req_profile != null)
+       {
+          //Clear all cookies in the requested profile
+          req_profile.clearAllCookies();
+       }
+       else
+       {
+          cookieswap_dbg("Invalid profile name [" + profName + "] passed in\n");
+       }
+    }
 
   },
 
@@ -725,6 +741,31 @@ CookieProfile.prototype.setFileHandle = function(newFile)
    this.fileName = newFile;
 }
 
+CookieProfile.prototype.clearAllCookies = function()
+{
+   //To clear all the cookies in this profile, create an empty file (which
+   //  removes the old file) and then just close it.
+   var file_stream = this.getEmptyFile();
+   file_stream.close(); 
+}
+
+CookieProfile.prototype.getEmptyFile = function()
+{
+   var file_out_stream = ffGetFileOutputStream();
+
+   //Create an empty file that will contain the profile's cookies
+   this.classDump("opening " + this.fileName.leafName + " for writing");
+   file_out_stream.init(this.fileName, COOKIE_FILE_WRITE_FLAGS, COOKIE_FILE_PERMISSIONS, 0);
+
+   //Write the header to the file
+   tmp_string = COOKIE_FILE_HDR;
+   file_out_stream.write(tmp_string, tmp_string.length);
+
+   this.classDump("Header written");
+
+   return(file_out_stream);  //It is assumed the caller will call file_out_stream.close()
+}
+
 //NOTE this method will copy all the cookies in the Profile to the browser.  It
 //  will NOT delete the cookies currently in the browser so the caller should
 //  remove the browser cookies first if that is desired.
@@ -820,16 +861,7 @@ CookieProfile.prototype.copyFromBrowser = function()
    var cookie_iter = cookie_mgr.enumerator;
    var curr_cookie;
    var i;
-   var file_out_stream = ffGetFileOutputStream();
-
-   this.classDump("opening " + this.fileName.leafName + " for writing");
-   file_out_stream.init(this.fileName, COOKIE_FILE_WRITE_FLAGS, COOKIE_FILE_PERMISSIONS, 0);
-
-   //Write the header to the file
-   tmp_string = COOKIE_FILE_HDR;
-   file_out_stream.write(tmp_string, tmp_string.length);
-
-   this.classDump("Header written");
+   var file_out_stream = this.getEmptyFile();  //Empty file to store the cookies
 
    for (i=0;cookie_iter.hasMoreElements();i++)
    {
