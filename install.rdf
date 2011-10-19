@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>cookieSwap@cookieSwap.mozdev.org</em:id>
-    <em:version>0.4.8</em:version>
+    <em:version>0.4.8.1</em:version>
     <em:type>2</em:type>
    
     <!-- Target Application this extension can install into, 
@@ -23,6 +23,7 @@
     <em:description>Tool to save and swap out a collection of cookies on the fly</em:description>
     <em:creator>Steven Tine</em:creator>
     <em:homepageURL>http://cookieSwap.mozdev.org</em:homepageURL>
+    <em:iconURL>chrome://cookieswap/skin/CookieSwap.png</em:iconURL>
   </Description>      
 </RDF>
 

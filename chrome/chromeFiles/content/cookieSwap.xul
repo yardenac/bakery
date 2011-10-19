@@ -22,9 +22,14 @@
    <statusbar id="status-bar" class="chromeclass-status">
          <!-- "context" is the popup panel used -->
 	  <statusbarpanel id="cookieSwap-panel" 
-		 label="CookieSwap"
+		 tooltip="cookieswap-tooltip"
 		 context="cookie-element-list" 
-		 ondblclick="cookieswap_statusBarDblClick()"  />
+		 ondblclick="cookieswap_statusBarDblClick()"  >
+		 <hbox>
+			 <image src="chrome://cookieswap/skin/CookieSwap_tinyicon.png" />
+			 <label id="cookieswap-label" value="CookieSwap" />
+		 </hbox>
+	 </statusbarpanel>
    </statusbar>
 
  <popupset id="mainPopupSet">
@@ -35,11 +40,16 @@
        <menuitem label="Remove all cookies" oncommand="cookieswap_UiRemoveAllCookies()" />
        <menuitem label="Manage profiles"    oncommand="cookieswap_manageProfiles()" />
 
-<!--OLD TEMP MENU ITEMS
 		 <menuitem label="generic" oncommand="cookieswap_runGeneric()" />
 		 <menuitem label="debugOn" oncommand="cookieswap_turnOnDebug()" />
+<!--OLD TEMP MENU ITEMS
  -->
 	 </popup>
+	 <tooltip id="cookieswap-tooltip" insertafter="backMenu">
+		 <vbox flex="1">
+			 <label id="cookieswap-tooltip" value="CookieSwap"/>
+		 </vbox>
+	 </tooltip>
  </popupset>
 
 <!-- Finish the changes to the statusbar -->

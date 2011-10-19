@@ -15,6 +15,7 @@
 // *  ---------  ---------  -----   ------                                     *
 // *  SteveTine  28Dec2005  12561   Initial Creation                           *
 // *  SteveTine  15Jan2005  12751   Stop-gap solution to multiple window prob  *
+// *  SteveTine  31Jan2007  Trac4   Exchange CookieSwap term in statusbar with icon *
 // *                                                                           *
 // ************************* BEGIN LICENSE BLOCK *******************************
 // * Version: MPL 1.1                                                          *
@@ -62,7 +63,7 @@ function ProfileUI()
 
    //This is the item that users see in the status bar...its name should include the
    //  active profile
-   this.cookieStatusBar = document.getElementById('cookieSwap-panel');
+   this.cookieStatusBar = document.getElementById('cookieswap-label');
 
    //Get the cookie-element-list which is the popup menu in the status bar
    this.cookieElemList = document.getElementById('cookie-element-list');
@@ -99,7 +100,7 @@ function profileUI_getInstance()
 //This static method is called by the browser when a user selects a profile from the menu
 function profileUI_profileSelected(menuitem)
 {
-   var  profileIdSelected = menuitem.getAttribute("profileId");
+   var  profileIdSelected = menuitem.getAttribute("label");
    var  profileUi = profileUI_getInstance();
 
    profileUi.classDump("New profile selected: " + menuitem.label + "(" + profileIdSelected + ")");
@@ -176,12 +177,19 @@ ProfileUI.prototype.showProfileAsActive = function(profileID)
    {
       //Set the checkbox on the profile and put the profile name in the StatusBar
       profile_menu.setAttribute("checked", true);
-      this.cookieStatusBar.setAttribute("label", "CookieSwap:" + profile_menu.getAttribute("label"));
+      this.cookieStatusBar.setAttribute("value", profile_menu.getAttribute("label"));
       this.classDump("Handled active profile");
    }
    else
    {
-      this.classDump("UNABLE TO FIND MENUTIEM FOR " + profileID );
+      //TODO...define INVALID_PROFILE_ID in this scope
+      //Passing in the INVALID_PROFILE_ID is normal (to deselect any profile).  If we
+      //  ended up here for another reason it is an unexpected error
+      if (profileID != INVALID_PROFILE_ID)
+      {
+         this.classDump("ERROR-UNABLE TO FIND MENUTIEM FOR '" + profileID + "'");
+      }
+
       //[TODO]Should uncheck the current profile and change the statusbar to just CookieSwap:
       //  Probably should keep track of currActive and deselect it first then try to
       //  select the new profile
@@ -197,7 +205,7 @@ ProfileUI.prototype.getMenuItem = function(profileID)
       
    this.classDump("Searching for elementByAttribute");
 
-   menu_items = this.cookieElemList.getElementsByAttribute("profileId", profileID);
+   menu_items = this.cookieElemList.getElementsByAttribute("label", profileID);
    
    this.classDump("Finished searching for elementByAttribute");
 
@@ -248,6 +256,6 @@ ProfileUI.prototype.uncheckAll = function()
 // this browser window
 ProfileUI.prototype.showBrowserAsInactive = function()
 {
-      this.cookieStatusBar.setAttribute("label", "CookieSwap:<inactive>");
+      this.cookieStatusBar.setAttribute("value", "");
 }
 

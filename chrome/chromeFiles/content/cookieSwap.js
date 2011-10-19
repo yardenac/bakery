@@ -45,8 +45,12 @@
 // **************************END LICENSE BLOCK**********************************
 
 //This constant defines if debug to stdout is enable or not.
-const COOKIE_SWAP_DEBUG_ENABLED=false;
+const COOKIE_SWAP_DEBUG_ENABLED=true;
 var   gExtensionActive=true;
+
+//Since the CookieSwapProfileManager is a Singleton Service, store it as a global
+//  once instantiated
+var   gCsProfileMgr=null;
 
 //Called only once at browser startup
 function cookieswap_init(event)
@@ -57,56 +61,41 @@ function cookieswap_init(event)
    window.removeEventListener("load", cookieswap_init, true);
 
    var profile_UI = profileUI_getInstance();
-   var profile_ctnr = CookieProfileContainer_getInstance();
-   var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-            .getService(Components.interfaces.nsIWindowMediator);
-   var browser_enumerator = wm.getEnumerator("navigator:browser");
-   var i;
 
-   //Determine how many browser windows are currently open
-   for(i=0; browser_enumerator.hasMoreElements(); i++) 
-   {
-      var browser_instance = browser_enumerator.getNext();
-   }
-   cookieswap_dbg(i + " browsers found");
- 
-   //If there is only one browser window, then we are the first window.
-   //  Currently, we only want to run cookieSwap in the first window
-   //  because I don't currently know how to keep more than one in sync.
-   if (i == 1)
-   {
-      //Set the global var to indicate that cookieSwap is active in this browser
-      gExtensionActive=true;
+   // instantiate CookieSwap profile manager component object
+   gCsProfileMgr = Components.classes["@cookieswap.mozdev.org/profile/manager-service;1"].
+                             getService(Components.interfaces.nsIProfile);
+   cookieswap_dbg("Created ProfileMgr Service");
+
+   //Register the window observer
+   var observer = new cookieswap_Observer();
+
+   //Set the global var to indicate that cookieSwap is active in this browser
+   //TODO: Dump this var
+   gExtensionActive=true;
       
-      //Register the function that is to be called when a user selected to
-      //  change the profile
-      profile_UI.registerProfileSelectedCallback(cookieswap_profileChangeSelected);
+   //Register the function that is to be called when a user selected to
+   //  change the profile
+   profile_UI.registerProfileSelectedCallback(cookieswap_profileChangeSelected);
 
-      //Populate the UI with the profiles available
-      for(var i=0; i<profile_ctnr.getNumOfProfiles(); i++)
-      {
-         profile_UI.addProfileToList(profile_ctnr.getProfileName(i), i);
-      }
+   var obj = Object();
+   var profile_array;
 
-      //Show the currently active profile as active on the UI
-      profile_UI.showProfileAsActive(profile_ctnr.getActiveProfileId());
-   }
-   else
-   {
-      //Set the global var to indicate that cookieSwap is NOT active in this browser
-      gExtensionActive=false;
-
-      cookieswap_dbg("Since this is browser #" + i + ", this browser is inactive");
-     
-      //Register one profile that when clicked will explain why this browser is
-      //  disabled.
-      profile_UI.registerProfileSelectedCallback(cookieswap_explainInactiveBrowser);
-      profile_UI.addProfileToList("Why inactive?", 0);
-
-      //Show on the UI that cookieSwap is not active in this browser window
-      profile_UI.showBrowserAsInactive();
-   }
+   //obj.value is the count, profile_array is the array
+   cookieswap_dbg("calling csProfileMgr.getProfileList");
+   profile_array = gCsProfileMgr.getProfileList(obj);
    
+   cookieswap_dbg("ProfileMgr says " + obj.value + " profiles exist");
+   //Populate the UI with the profiles available
+   for(var i=0; i<obj.value; i++)
+   {
+      cookieswap_dbg("adding profile:" + profile_array[i]);
+      profile_UI.addProfileToList(profile_array[i], i);
+   }
+
+   //Show the currently active profile as active on the UI
+   profile_UI.showProfileAsActive(gCsProfileMgr.currentProfile);
+
    cookieswap_dbg("END cookieswap_init");
 }
 
@@ -126,50 +115,13 @@ function cookieswap_profileChangeSelected(profileID)
 {
    cookieswap_dbg("START switchProfile to " + profileID);
 
-   var profile_ctnr = CookieProfileContainer_getInstance();
-   var profile_UI = profileUI_getInstance();
+   gCsProfileMgr.currentProfile = profileID;
 
-   var old_profile_id = profile_ctnr.getActiveProfileId();
-   var old_profile = profile_ctnr.getProfile(old_profile_id);
-
-   var new_profile_id = profileID;
-   var new_profile = profile_ctnr.getProfile(new_profile_id);
-
-   //First thing to do is copy all the cookies from the browser and
-   //  save them to the profile being swapped out
-   if (old_profile != null)
+   //The only reason this should fail is if the ProfileManager 
+   //  couldn't swap to the requested profile
+   if (gCsProfileMgr.currentProfile != profileID)
    {
-      old_profile.copyFromBrowser();
-   }
-   else
-   {
-      alert("[cookieswap] Internal error, profile out is invalid");
-   }
-
-   //Next thing to do is to remove the cookies from the browser and copy
-   //  in all the cookies associated with the profile being swapped in.
-   //BUT, first ensure we set the ActiveProfileID to INVALID so that if
-   //  we were to crash, all our profiles will be intact in persistent
-   //  memory and we won't come up thinking that the cookies in the browers
-   //  are associated with any profile.
-   profile_ctnr.setActiveProfileId(INVALID_PROFILE_ID);
-   profile_UI.showProfileAsActive(INVALID_PROFILE_ID);
-
-   //Remove all the browser cookies
-   cookieswap_removeAllCookies();
-  
-   if (new_profile != null)
-   {
-      //Now swap in the cookies from the profile to the browser
-      new_profile.copyToBrowser();
-      profile_ctnr.setActiveProfileId(new_profile_id);
-      profile_UI.showProfileAsActive(new_profile_id);
-
-      cookieswap_dbg("Swap from profile " + old_profile_id + " to " + new_profile_id + " complete");
-   }
-   else
-   {
-      alert("[cookieswap] Internal error, profile in is invalid...no cookies swapped in");
+      alert("[cookieswap] Internal error, swap not successful");
    }
    
    cookieswap_dbg("END switchProfile");
@@ -177,7 +129,18 @@ function cookieswap_profileChangeSelected(profileID)
 
 function cookieswap_runGeneric()
 {
+   var dnsCacheVal;
+
    cookieswap_dbg("START runGeneric()");
+
+   var net_pref = Components.classes['@mozilla.org/preferences-service;1']
+                 .getService(Components.interfaces.nsIPrefService);
+
+   net_pref = net_pref.getBranch('network.');
+   dnsCacheVal = net_pref.getIntPref('dnsCacheExpiration'); 
+   net_pref.setIntPref('dnsCacheExpiration', 0); 
+   net_pref.setIntPref('dnsCacheExpiration', dnsCacheVal); 
+   cookieswap_dbg("Set network.dnsCacheExpiration to 0 then back to " + dnsCacheVal);
 
    cookieswap_dbg("END runGeneric()");
 }
@@ -220,13 +183,70 @@ function cookieswap_turnOnDebug()
 
 function cookieswap_statusBarDblClick()
 {
+cookieswap_dbg("calling notify");
+Components.classes["@mozilla.org/observer-service;1"]
+         .getService(Components.interfaces.nsIObserverService)
+         .notifyObservers(null, "cookieswap_swap", "someAdditionalInformationPassedAs'Data'Parameter");
+cookieswap_dbg("called notify");
+
+// instantiate component object
+var oProfileMgr = Components.classes["@cookieswap.mozdev.org/profile/manager-service;1"].
+                             getService(Components.interfaces.nsIProfile);
+                             //createInstance(Components.interfaces.nsIProfile);
+cookieswap_dbg("Created ProfileMgr");
+
+//--cloneProfile
+oProfileMgr.cloneProfile("test");
+cookieswap_dbg("Cloned Profile");
+
+//--profileCount
+cookieswap_dbg("Profile Count = " + oProfileMgr.profileCount);
+
+//--createNewProfile
+oProfileMgr.createNewProfile("test1", "test1dir", "", true);
+
+//--deleteProfile
+oProfileMgr.deleteProfile("test1", true);
+oProfileMgr.deleteProfile("test1", false);
+
+//--getProfileList
+var obj = Object();
+var profile_array;
+
+profile_array = oProfileMgr.getProfileList(obj);
+cookieswap_dbg("obj.value = " + obj.value);
+cookieswap_dbg("profile_array[0] = " + profile_array[0]);
+cookieswap_dbg("profile_array[1]= " + profile_array[1]);
+
+//--profileExists
+cookieswap_dbg("test exists = " + oProfileMgr.profileExists("test"));
+cookieswap_dbg("test1 exists = " + oProfileMgr.profileExists("test1"));
+
+//renameProfile
+oProfileMgr.renameProfile("test", "test2");
+
+//shutDownCurrentProfile
+oProfileMgr.shutDownCurrentProfile(Components.interfaces.nsIProfile.SHUTDOWN_PERSIST);
+oProfileMgr.shutDownCurrentProfile(Components.interfaces.nsIProfile.SHUTDOWN_CLEANSE);
+
+cookieswap_dbg("currentProfile = " + oProfileMgr.currentProfile);
+oProfileMgr.currentProfile = "test1";
+cookieswap_dbg("currentProfile = " + oProfileMgr.currentProfile);
+oProfileMgr.currentProfile = "test2";
+cookieswap_dbg("currentProfile = " + oProfileMgr.currentProfile);
 }
 
 function cookieswap_dbg(str)
 {
    if(COOKIE_SWAP_DEBUG_ENABLED == true)
-   {
+  {
+      //To log to the javascript console (Tools->Error Console) use these lines
+      //var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+      //                           .getService(Components.interfaces.nsIConsoleService);
+      //consoleService.logStringMessage("[cookieswap]" + str );
+
       dump("[cookieswap]" + str + "\n");
+
    }
 }
 
@@ -242,3 +262,29 @@ function cookieswap_manageProfiles()
           "in the Windows file explorer window to see these hidden directories.\n\n" +
           "See http://cookieswap.mozdev.org/help.html for detailed instructions.\n");
 }
+
+function cookieswap_Observer()
+{
+  this.register();
+}
+cookieswap_Observer.prototype = {
+  observe: function(subject, topic, data) {
+   // Do your stuff here.
+   cookieswap_dbg("Observer called! " + data);
+   //TODO, getInstance feels heavy here
+   var profile_UI = profileUI_getInstance();
+   profile_UI.showProfileAsActive(data);
+  },
+  register: function() {
+    var observerService = Components.classes["@mozilla.org/observer-service;1"]
+                          .getService(Components.interfaces.nsIObserverService);
+    observerService.addObserver(this, "cookieswap_swap", false);
+  },
+  unregister: function() {
+    var observerService = Components.classes["@mozilla.org/observer-service;1"]
+                            .getService(Components.interfaces.nsIObserverService);
+    observerService.removeObserver(this, "cookieswap_swap");
+  }
+}
+
+
