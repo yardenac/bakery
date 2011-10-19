@@ -78,6 +78,10 @@ function ProfileUI()
    //Default it to null until a user registers their callback with the class.
    this.profileSelectedCallback = null;
 
+   //When going to private browsing, need to keep the original label so it can
+   //  be restored
+   this.statusBarValuePriorToDisable = "";
+
    this.classDump("END ctor");
 }
 
@@ -138,7 +142,14 @@ ProfileUI.prototype.addProfileToList = function(profileName, profileID)
    new_profile = document.createElement("menuitem");
    new_profile.setAttribute("id", "profile:" + profileName);
    new_profile.setAttribute("label", profileName);
-   new_profile.setAttribute("type", "checkbox");
+
+   //Use the same name for items of the same radio group
+   new_profile.setAttribute("type", "radio");
+   new_profile.setAttribute("name", "cookie-profile-list");
+
+   //Setting autocheck to false means we will keep track of indicating the
+   //  correct item is checked/selected
+   new_profile.setAttribute("autocheck", false);
    new_profile.setAttribute("checked", false);
    new_profile.setAttribute("class", "cookie-profile");
    new_profile.setAttribute("profileId", profileID);
@@ -156,6 +167,34 @@ ProfileUI.prototype.removeProfileFromList = function(profileID)
 {
 //---[TODO] NOT IMPLEMENTED YET---
    this.classDump("UNIMPLEMENTED FUNCTION CALLED...removeProfileFromList");
+}
+
+//This method will remove the selected profile from the UI list
+ProfileUI.prototype.removeAllProfilesFromList = function()
+{
+   this.classDump("removeAllProfilesFromList");
+
+   //Get all the cookie-profile items from the menu
+   menu_items = this.cookieElemList.getElementsByAttribute("class", "cookie-profile");
+   
+   this.classDump("Finished searching for elementsByAttribute");
+
+   if (menu_items != null)
+   {
+      //We found the menu item, but it is possible that item 0 is null
+      this.classDump("Found " + menu_items.length + " menu items");
+
+      //Walk the list and remove the menu items
+      for(var i=menu_items.length-1; i>=0; i--)
+      {
+         this.cookieElemList.removeChild(menu_items[i]);
+      }
+   }
+   else
+   {
+      this.classDump("No menu items found to remove");
+   }
+
 }
 
 //This method will show the selected profile as active in the UI list
@@ -257,5 +296,19 @@ ProfileUI.prototype.uncheckAll = function()
 ProfileUI.prototype.showBrowserAsInactive = function()
 {
       this.cookieStatusBar.setAttribute("value", "");
+}
+
+ProfileUI.prototype.enterPrivateBrowsing = function()
+{
+   //Change icon
+   document.getElementById("cookieswap-status-bar-icon").setAttribute("src", 
+                  "chrome://cookieswap/skin/CookieSwap_private_tinyicon.png");
+}
+ 
+ProfileUI.prototype.exitPrivateBrowsing = function()
+{
+   //Change icon
+   document.getElementById("cookieswap-status-bar-icon").setAttribute("src", 
+                  "chrome://cookieswap/skin/CookieSwap_tinyicon.png");
 }
 

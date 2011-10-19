@@ -1,0 +1,117 @@
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+ 
+<dialog id="cookieswap-options"
+     title="CookieSwap Control Panel"
+     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+     windowtype="cookieswap_options"
+     buttons="accept, cancel"
+     ondialogaccept="cookieswap_mgrClose(); return true;"
+     ondialogcancel="cookieswap_mgrCancel(); return true;"
+     onload="cookieswap_mgrLoad();"
+     >
+
+     <script type="application/x-javascript" src="chrome://cookie_swap/content/csLogger.js"></script>
+     <script type="application/x-javascript" src="chrome://cookie_swap/content/cookieSwap.js"></script>
+     <script type="application/x-javascript" src="chrome://cookie_swap/content/csControlPanel.js"></script>
+      
+     <tabbox id="cookieswap-options-tabbox">
+        <tabs>
+           <tab label="Options" id="cookieswap-options-tab" />
+           <tab label="Manage Profiles" id="cookieswap-profiles-tab" />
+           <tab label="About" id="cookieswap-about-tab" />
+        </tabs>
+
+        <tabpanels> 
+        <!-- ************Options Tab********** -->
+	<tabpanel>
+		<vbox>
+		   <hbox>
+              <vbox align="left">
+                 <groupbox> <caption label="Menu items enabled:"/>
+                    <checkbox id="cs-pref-menu-remove-all-cookies" label="Remove cookies"  />
+                    <checkbox id="cs-pref-menu-remove-all-profile-cookies" label="Remove cookies (all profiles)"  />
+                    <checkbox id="cs-pref-menu-manage-profiles" label="Manage profiles"  />
+                    <checkbox id="cs-pref-menu-help" label="Help" hidden="true" /> <!-- Disabled for now -->
+                    <checkbox id="cs-pref-menu-about" label="About"  />
+                 </groupbox>
+              </vbox>
+
+              <vbox align="left">
+                 <groupbox> <caption label="After switching to a new profile:"/>
+                    <radiogroup id="cookieswap-auto-reload-radiogroup">
+                       <radio id="CSAutoReload0" label="Don't reload any pages" value="0" />
+                       <radio id="CSAutoReload1" label="Reload the current page" value="1" /> 
+               <!--    <radio id="CSAutoReload2" label="Reload all tabs in the current window" value="2" /> -->
+                       <radio id="CSAutoReload3" label="Reload all tabs/windows" value="3" />
+                    </radiogroup>
+                 </groupbox>
+	 </vbox>
+ </hbox>
+              <vbox align="left">
+		      <groupbox> <caption label="Status bar options:"/>
+			      <checkbox id="cs-pref-menu-delay" label="Delay display of CookieSwap menu on left-click"  />
+			      <label value="(This makes it easier to double-click the status bar to rotate to the next profile." />
+		      </groupbox>
+	      </vbox>
+	      </vbox>
+
+
+           </tabpanel> 
+
+        <!-- ************Manage Profiles Tab********** -->
+           <tabpanel> 
+             <vbox> 
+              <hbox align="top" flex="1" style="overflow: auto;">
+                 <listbox id="cookieswap-manage-profile-list" onselect="cookieswap_mgrSelect(this.selectedItem);" flex="2" rows="10"></listbox>
+                 <vbox>
+                    <hbox flex="1" pack="left">
+                       <vbox>
+                          <button id="new-button" label="New" oncommand="cookieswap_mgrNew()" />
+                          <button id="edit-button" label="Rename" oncommand="cookieswap_mgrRename()" />
+                          <button id="remove-button" label="Delete" oncommand="cookieswap_mgrDelete()" />
+                       </vbox>
+                    </hbox>
+                    
+                    <grid>
+                       <columns>
+                          <column/>
+                          <column/>
+                       </columns>
+                       <rows>
+                          <row>
+                             <label id="cs-colorpicker-fg-label" value="Change Text Color" hidden="true" />
+                             <colorpicker id="cs-colorpicker-fg-button" type="button" color="#FFFF00"  
+                                          onchange="cookieswap_mgrFgColorChange(this.color)" hidden="true" />
+                          </row>
+                       </rows>
+                    </grid>
+                                        
+                 </vbox>
+              </hbox>
+              <label id="cs-mgr-private-browsing-label" style="font-weight: bold; color: #FF0000" value="Sorry...Profile Management not supported when in Private Browsing" hidden="false" />
+           </vbox>
+         </tabpanel>
+
+        <!-- ************About Tab********** -->
+         <tabpanel> 
+            <vbox style="width: 200px;">
+               <hbox>
+                  <image src="chrome://cookieswap/skin/CookieSwap.png" />
+                  <label value="CookieSwap" style="font-weight: bold; margin-right: 2px;" /> 
+                  <label value="" id="cookieswap-about-version" style="font-weight: bold; margin-right: 2px;" /> 
+               </hbox>
+
+               <label   value="Created by Steven Tine" />
+               <hbox>
+                  <label   value="Extension Homepage: " />
+                  <!-- A little tricky because the 'opener' may be the Add-ons window which isn't a browser -->
+                  <label   value="http://cookieswap.mozdev.org"
+                           style="color: #0000FF; text-decoration: underline; cursor: pointer;"         
+                           onclick="cookieswap_mgrOpenLinkInBrowserTab('http://cookieswap.mozdev.org'); self.close();" />
+               </hbox>
+            </vbox>
+         </tabpanel>
+         
+      </tabpanels>
+   </tabbox>
+</dialog>

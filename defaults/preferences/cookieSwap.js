@@ -42,4 +42,48 @@
 // **************************END LICENSE BLOCK**********************************
 
 //To modify this pref after install access "about:config" (GUI to come)
-//pref("extensions.cookieswap.statusBarPreface", "CookieSwap");
+
+//What pages to reload after a profile swap (None=0/Page=1/Window=2/AllWindows=3)?
+pref("extensions.cookieswap.options.ReloadOnProfileChange", 1);
+
+//What menu items to enable...Remove all cookies
+pref("extensions.cookieswap.options.MenuEnable.cookieswap-menu-remove-all-cookies", true);
+
+//What menu items to enable...Remove all cookies (all profiles)
+pref("extensions.cookieswap.options.MenuEnable.cookieswap-menu-remove-all-profile-cookies", true);
+
+//What menu items to enable...Manage Profiles
+pref("extensions.cookieswap.options.MenuEnable.cookieswap-menu-manage-profiles", true);
+
+//What menu items to enable...Help
+pref("extensions.cookieswap.options.MenuEnable.cookieswap-menu-help", false);
+
+//What menu items to enable...About
+pref("extensions.cookieswap.options.MenuEnable.cookieswap-menu-about", true);
+
+//Delay when left-clicking the status bar
+pref("extensions.cookieswap.options.MenuPopupDelay", 0);
+
+//---------General enable from chrome/browser + XPCOM component------
+//Should debug from the browser/chrome be sent to the Error Console 
+pref("extensions.cookieswap.debug.GeneralBrowserEnable", false);
+
+//Should debug from the XPCOM component be sent to the Error Console 
+pref("extensions.cookieswap.debug.GeneralXpcomEnable", false);
+
+//--------If either of the above are set to true, the following
+//        defines where the messages go
+
+//If General debug enabled, this defines if the messages go to the
+//  FF Error Console (Tools -> Error Console)
+pref("extensions.cookieswap.debug.ErrorConsole", false);
+
+//If General debug enabled, this defines if the messages go to the
+//  OS Console (firefox.exe -console)
+pref("extensions.cookieswap.debug.OsConsole", false);
+
+//If General debug enabled, this defines if the XPCOM messages
+//  are logged to a file (this is the filename)
+pref("extensions.cookieswap.debug.File", "");
+
+

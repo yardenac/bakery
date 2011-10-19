@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>cookieSwap@cookieSwap.mozdev.org</em:id>
-    <em:version>0.5.165B</em:version>
+    <em:version>0.5.248Beta</em:version>
     <em:type>2</em:type>
    
     <!-- Target Application this extension can install into, 
@@ -14,10 +14,12 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>1.5</em:minVersion>
-        <em:maxVersion>3.0.*</em:maxVersion>
+        <em:maxVersion>3.5.*</em:maxVersion>
       </Description>
     </em:targetApplication>
-   
+
+    <em:optionsURL>chrome://cookie_swap/content/csControlPanel.xul</em:optionsURL> 
+
     <!-- Front End MetaData -->
     <em:name>CookieSwap</em:name>
     <em:description>Tool to save and swap out a collection of cookies on the fly</em:description>
