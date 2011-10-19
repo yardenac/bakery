@@ -43,8 +43,8 @@
 
 //The Date class takes milliseconds, while cookies are stored in seconds.  Use
 //  this define to convert from sec to ms.
-const SEC_TO_MS_MULT = 1000;
-const TAB_FIELD = "\t";
+const CS_SEC_TO_MS_MULT = 1000;
+const CS_TAB_FIELD = "\t";
 
 //-------------------cs_Cookie class def---------------------
 //  This file contains the definition of the "cs_Cookie" class which
@@ -93,7 +93,7 @@ function cs_Cookie(cookie)
          //Cookie File string format is:
          //  domain <tab> tailmatch <tab> path <tab> secure <tab> expires <tab> name <tab> value
          //   [0]           [1]           [2]         [3]          [4]           [5]        [6]
-         var  fields=cookie.split(TAB_FIELD);
+         var  fields=cookie.split(CS_TAB_FIELD);
 
          //The split should find at least 6 fields...if not, it is not a valid string
          if (fields.length >= 6)
@@ -133,12 +133,12 @@ cs_Cookie.prototype.getCookieFileString = function()
    var tailmatch = this.host.charAt(0) == '.' ? "TRUE" : "FALSE";
    var is_secure = this.isSecure ? "TRUE" : "FALSE"; 
    
-   cookie_string = this.host + TAB_FIELD + 
-                   tailmatch + TAB_FIELD + 
-                   this.path + TAB_FIELD +
-                   is_secure + TAB_FIELD +
-                   this.expires + TAB_FIELD +
-                   this.name + TAB_FIELD +
+   cookie_string = this.host + CS_TAB_FIELD + 
+                   tailmatch + CS_TAB_FIELD + 
+                   this.path + CS_TAB_FIELD +
+                   is_secure + CS_TAB_FIELD +
+                   this.expires + CS_TAB_FIELD +
+                   this.name + CS_TAB_FIELD +
                    this.value;
 
    this.classDump("END getCookieFileString()");
@@ -167,7 +167,7 @@ cs_Cookie.prototype.getCookieString = function()
    //  it as such.
    if (this.expires != 0)
    {
-      cookie_string = cookie_string + "expires=" + (new Date(SEC_TO_MS_MULT * this.expires)) + ";";
+      cookie_string = cookie_string + "expires=" + (new Date(CS_SEC_TO_MS_MULT * this.expires)) + ";";
    }
 
    cookie_string = cookie_string + "path=" + this.path + ";";

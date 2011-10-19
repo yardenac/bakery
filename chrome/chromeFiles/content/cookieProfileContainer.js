@@ -43,17 +43,17 @@
 //Static instance attribute
 var gCookieProfileContainer_instance = null;
 
-const INVALID_PROFILE_ID=-1;
+const CS_INVALID_PROFILE_ID=-1;
 const COOKIE_SWAP_DIR_NAME="CookieSwap";
 const COOKIE_SWAP_DIR_PERMISSIONS = 0700;  //The dir is user r/w/x only
 
-const COOKIE_FILE_PREFACE="cookies_";  //All profile files start with this string
-const INACT_COOKIE_FILE_EXT="txt";    //Inactive profiles have this file extension
-const ACTV_COOKIE_FILE_EXT="tx1";     //Active profiles have this file extension
+const CS_COOKIE_FILE_PREFACE="cookies_";  //All profile files start with this string
+const CS_INACT_COOKIE_FILE_EXT="txt";    //Inactive profiles have this file extension
+const CS_ACTV_COOKIE_FILE_EXT="tx1";     //Active profiles have this file extension
 
-const DEF_PROFILE1_FILENAME = COOKIE_FILE_PREFACE + "Profile1" + "." + ACTV_COOKIE_FILE_EXT;
-const DEF_PROFILE2_FILENAME = COOKIE_FILE_PREFACE + "Profile2" + "." + INACT_COOKIE_FILE_EXT;
-const DEF_PROFILE3_FILENAME = COOKIE_FILE_PREFACE + "Profile3" + "." + INACT_COOKIE_FILE_EXT;
+const CS_DEF_PROFILE1_FILENAME = CS_COOKIE_FILE_PREFACE + "Profile1" + "." + CS_ACTV_COOKIE_FILE_EXT;
+const CS_DEF_PROFILE2_FILENAME = CS_COOKIE_FILE_PREFACE + "Profile2" + "." + CS_INACT_COOKIE_FILE_EXT;
+const CS_DEF_PROFILE3_FILENAME = CS_COOKIE_FILE_PREFACE + "Profile3" + "." + CS_INACT_COOKIE_FILE_EXT;
 
 //-------------------CookieProfileContainer class def---------------------
 //The CookieProfileContainer class handles keeping track of where all the CookieProfiles
@@ -71,7 +71,7 @@ function CookieProfileContainer()
 
    ////--TEMP HARDCODED PROFILES UNTIL PERS STORAGE FIGURED OUT--
    this.profileArray = new Array();
-   this.activeProfileId = INVALID_PROFILE_ID;
+   this.activeProfileId = CS_INVALID_PROFILE_ID;
 
    //This will get the directory of the current Mozilla profile.
    //  We'll put the CookieSwap dir under there since Firefox's cookies.txt file
@@ -97,9 +97,9 @@ function CookieProfileContainer()
       var def_profile3 = this.profileDir.clone()
 
       //Append the filenames to the directory
-      def_profile1.append(DEF_PROFILE1_FILENAME);
-      def_profile2.append(DEF_PROFILE2_FILENAME);
-      def_profile3.append(DEF_PROFILE3_FILENAME);
+      def_profile1.append(CS_DEF_PROFILE1_FILENAME);
+      def_profile2.append(CS_DEF_PROFILE2_FILENAME);
+      def_profile3.append(CS_DEF_PROFILE3_FILENAME);
 
       //Now create the default files
       def_profile1.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, COOKIE_FILE_PERMISSIONS);
@@ -124,7 +124,7 @@ function CookieProfileContainer()
       this.classDump("--File located...Name=" + file_name);
 
       //Now split off the preface of the filename used for cookie files
-      var fname_split = file_name.split(COOKIE_FILE_PREFACE);
+      var fname_split = file_name.split(CS_COOKIE_FILE_PREFACE);
       this.classDump("Num of split is " + fname_split.length);
     
       //If the split found the preface, then the file is likely a cookie file
@@ -148,7 +148,7 @@ function CookieProfileContainer()
             this.profileArray[i].name = profile_name[0];
 
             //If the file extension shows it as active, track it
-            if (profile_name[1] == ACTV_COOKIE_FILE_EXT)
+            if (profile_name[1] == CS_ACTV_COOKIE_FILE_EXT)
             {
                this.classDump("Profile #" + i + " is active");
                this.activeProfileId = i;
@@ -222,7 +222,7 @@ CookieProfileContainer.prototype.addProfile = function(profileName)
    //The next availabe index in the array is the length
    //var next_index = this.profileArray.length;
 
-   return(INVALID_PROFILE_ID);
+   return(CS_INVALID_PROFILE_ID);
 }
 
 CookieProfileContainer.prototype.removeProfile = function(profileId)
@@ -278,31 +278,31 @@ CookieProfileContainer.prototype.setActiveProfileId = function(profileId)
 
    //If the currently active profile is valid, rename that profile's filename to indicate
    //  that is no longer the active profile
-   if ((this.activeProfileId != INVALID_PROFILE_ID)  && (this.activeProfileId < this.profileArray.length))
+   if ((this.activeProfileId != CS_INVALID_PROFILE_ID)  && (this.activeProfileId < this.profileArray.length))
    {
       var i = this.activeProfileId;
       var fileHandle = this.profileArray[i].profile.getFileHandle();
 
       //Renaming to inactive filename
       this.classDump("Renaming " + this.profileArray[i].name + " (old profile)");
-      this.profileArray[i].profile.setFileHandle(this.moveFile(fileHandle, COOKIE_FILE_PREFACE + this.profileArray[i].name + "." + INACT_COOKIE_FILE_EXT));
+      this.profileArray[i].profile.setFileHandle(this.moveFile(fileHandle, CS_COOKIE_FILE_PREFACE + this.profileArray[i].name + "." + CS_INACT_COOKIE_FILE_EXT));
    }
 
    //If the new profileID is valid, rename that profile's file to indicate that it
    //  is the active profile
-   if ((profileId != INVALID_PROFILE_ID)  && (profileId < this.profileArray.length))
+   if ((profileId != CS_INVALID_PROFILE_ID)  && (profileId < this.profileArray.length))
    {
       var i = profileId;  //Rename profileId to a shorter var
       var fileHandle = this.profileArray[i].profile.getFileHandle();
          
       //Renaming to active filename
       this.classDump("Renaming " + this.profileArray[i].name + " (new profile)");
-      this.profileArray[i].profile.setFileHandle(this.moveFile(fileHandle, COOKIE_FILE_PREFACE + this.profileArray[i].name + "." + ACTV_COOKIE_FILE_EXT));
+      this.profileArray[i].profile.setFileHandle(this.moveFile(fileHandle, CS_COOKIE_FILE_PREFACE + this.profileArray[i].name + "." + CS_ACTV_COOKIE_FILE_EXT));
    }
    else
    {
       this.classDump("Invalid ID passed in to setActiveProfileId");
-      profileId = INVALID_PROFILE_ID;  //Non-valid ID passed in, make it INVALID
+      profileId = CS_INVALID_PROFILE_ID;  //Non-valid ID passed in, make it INVALID
    }
       
    this.activeProfileId = profileId;

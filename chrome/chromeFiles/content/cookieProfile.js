@@ -42,23 +42,23 @@
 // *                                                                           *
 // **************************END LICENSE BLOCK**********************************
 
-const FLAGS_PR_RDONLY      = 0x01; //Open for reading only.
-const FLAGS_PR_WRONLY      = 0x02; //Open for writing only.
-const FLAGS_PR_RDWR        = 0x04; //Open for reading and writing.
-const FLAGS_PR_CREATE_FILE = 0x08; //If the file does not exist, the file is created.
-const FLAGS_PR_APPEND      = 0x10; //The file pointer is set to the end of the file prior to each write.
-const FLAGS_PR_TRUNCATE    = 0x20; //If the file exists, its length is truncated to 0.
-const FLAGS_PR_SYNC        = 0x40; //If set, each write will wait for both the file data and file status 
+const CS_FLAGS_PR_RDONLY      = 0x01; //Open for reading only.
+const CS_FLAGS_PR_WRONLY      = 0x02; //Open for writing only.
+const CS_FLAGS_PR_RDWR        = 0x04; //Open for reading and writing.
+const CS_FLAGS_PR_CREATE_FILE = 0x08; //If the file does not exist, the file is created.
+const CS_FLAGS_PR_APPEND      = 0x10; //The file pointer is set to the end of the file prior to each write.
+const CS_FLAGS_PR_TRUNCATE    = 0x20; //If the file exists, its length is truncated to 0.
+const CS_FLAGS_PR_SYNC        = 0x40; //If set, each write will wait for both the file data and file status 
                                    //  to be physically updated.
-const FLAGS_PR_EXCL        = 0x80; //With PR_CREATE_FILE, if the file does not exist, the file is created. 
+const CS_FLAGS_PR_EXCL        = 0x80; //With PR_CREATE_FILE, if the file does not exist, the file is created. 
                                    //  If the file already exists, no action and NULL is returned
 
-const COOKIE_FILE_PERMISSIONS = 0600;  //User read/write only (matches Linux cookies.txt file perm)
-const COOKIE_FILE_READ_FLAGS  = FLAGS_PR_RDONLY;
-const COOKIE_FILE_WRITE_FLAGS = FLAGS_PR_WRONLY | FLAGS_PR_CREATE_FILE | FLAGS_PR_TRUNCATE;
+const CS_COOKIE_FILE_PERMISSIONS = 0600;  //User read/write only (matches Linux cookies.txt file perm)
+const CS_COOKIE_FILE_READ_FLAGS  = CS_FLAGS_PR_RDONLY;
+const CS_COOKIE_FILE_WRITE_FLAGS = CS_FLAGS_PR_WRONLY | CS_FLAGS_PR_CREATE_FILE | CS_FLAGS_PR_TRUNCATE;
 
 const CS_NEW_LINE = "\n";  //"\r\n"
-const COOKIE_FILE_HDR = 
+const CS_COOKIE_FILE_HDR = 
     "#This file was created by the CookieSwap extension...see cookieswap.mozdev.org" + CS_NEW_LINE + 
     "#NOTE: if this file's extension is 'tx1' then this is an" + CS_NEW_LINE + 
     "# active profile and the cookies in here are old and will be overwritten by the " +  CS_NEW_LINE + 
@@ -120,7 +120,7 @@ CookieProfile.prototype.copyToBrowser = function()
 
    try
    {
-      istream.init(this.fileName, COOKIE_FILE_READ_FLAGS, COOKIE_FILE_PERMISSIONS, 0);
+      istream.init(this.fileName, CS_COOKIE_FILE_READ_FLAGS, CS_COOKIE_FILE_PERMISSIONS, 0);
       this.classDump("Open, converting to nsILineInputStream");
       istream.QueryInterface(Components.interfaces.nsILineInputStream);
    }
@@ -203,10 +203,10 @@ CookieProfile.prototype.copyFromBrowser = function()
    var file_out_stream = ffGetFileOutputStream();
 
    this.classDump("opening " + this.fileName.leafName + " for writing");
-   file_out_stream.init(this.fileName, COOKIE_FILE_WRITE_FLAGS, COOKIE_FILE_PERMISSIONS, 0);
+   file_out_stream.init(this.fileName, CS_COOKIE_FILE_WRITE_FLAGS, CS_COOKIE_FILE_PERMISSIONS, 0);
 
    //Write the header to the file
-   tmp_string = COOKIE_FILE_HDR;
+   tmp_string = CS_COOKIE_FILE_HDR;
    file_out_stream.write(tmp_string, tmp_string.length);
 
    this.classDump("Header written");

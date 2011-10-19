@@ -32,7 +32,7 @@
 	 </statusbarpanel>
    </statusbar>
 
- <popupset id="mainPopupSet">
+ <popupset id="bookmarksPopupset">
 	 <popup id="cookie-element-list">
 
        <menuseparator id="cookie-profile-list-separator" />

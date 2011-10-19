@@ -42,7 +42,7 @@
 // **************************END LICENSE BLOCK**********************************
 
 //Static instance attribute
-var gProfileUI_instance = null;
+var gCsProfileUI_instance = null;
 
 //-------------ProfileUI class definition--------------
 //The ProfileUI class handles displaying all the Profile information to the User Interface.  
@@ -86,15 +86,15 @@ function ProfileUI()
 //Publically available method to get the singleton instance of the ProfileUI class
 function profileUI_getInstance()
 {
-   if (gProfileUI_instance == null)
+   if (gCsProfileUI_instance == null)
    {
       //If this is the first time this method is being called, create the singleton
       //  instance of the class and return it.
-      gProfileUI_instance = new ProfileUI();
+      gCsProfileUI_instance = new ProfileUI();
       cookieswap_dbg("Created singleton instance of ProfileUI\n");
    }
 
-   return gProfileUI_instance;
+   return gCsProfileUI_instance;
 }
 
 //This static method is called by the browser when a user selects a profile from the menu
@@ -185,7 +185,7 @@ ProfileUI.prototype.showProfileAsActive = function(profileID)
       //TODO...define INVALID_PROFILE_ID in this scope
       //Passing in the INVALID_PROFILE_ID is normal (to deselect any profile).  If we
       //  ended up here for another reason it is an unexpected error
-      if (profileID != INVALID_PROFILE_ID)
+      if (profileID != CS_INVALID_PROFILE_ID)
       {
          this.classDump("ERROR-UNABLE TO FIND MENUTIEM FOR '" + profileID + "'");
       }

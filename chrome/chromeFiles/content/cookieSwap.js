@@ -46,7 +46,7 @@
 
 //This constant defines if debug to stdout is enable or not.
 const COOKIE_SWAP_DEBUG_ENABLED=false;
-var   gExtensionActive=true;
+var   gCookieSwapExtensionActive=true;
 
 //Since the CookieSwapProfileManager is a Singleton Service, store it as a global
 //  once instantiated
@@ -72,7 +72,7 @@ function cookieswap_init(event)
 
    //Set the global var to indicate that cookieSwap is active in this browser
    //TODO: Dump this var
-   gExtensionActive=true;
+   gCookieSwapExtensionActive=true;
       
    //Register the function that is to be called when a user selected to
    //  change the profile
