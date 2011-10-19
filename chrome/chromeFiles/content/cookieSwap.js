@@ -295,7 +295,7 @@ function cookieswap_manageProfiles()
    var profile_ctnr = CookieProfileContainer_getInstance();
 
    alert("Sorry...this feature will be in a future release.\n" +
-         "Until then, you can add, delete and rename profiles by closing the broswer and \n" +
+         "Until then, you can add, delete and rename profiles by closing the browser and \n" +
          "changing the filenames in this dir:\n" +
           profile_ctnr.profileDir.path + "\n" +
           "On Windows, some of these directories may be hidden.  Use Tools->FolderOptions->View->ShowHiddenFilesAndFolders\n" +
